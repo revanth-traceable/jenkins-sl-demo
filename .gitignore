@@ -1,0 +1,19 @@
+# Build artifacts
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Jenkins workspace
+workspace/
+builds/
+build-info.txt
+deployment/
+
+# Logs
+*.log
