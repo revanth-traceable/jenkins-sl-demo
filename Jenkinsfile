@@ -28,7 +28,12 @@ node {
             ])
             echo "Deployment completed: ${deployResult}"
         }
-        
+        stage('Read Config File') {
+
+            def readme = readFile('README.md')
+            echo readme
+        }
+                
         echo "Pipeline completed!"
         
     } catch (Exception e) {
