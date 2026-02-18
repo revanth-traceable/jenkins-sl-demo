@@ -1,5 +1,3 @@
-@Library('jenkins-demo-library') _
-
 import com.example.utils.StringUtils
 import com.example.utils.BuildUtils
 import com.example.notification.NotificationService
