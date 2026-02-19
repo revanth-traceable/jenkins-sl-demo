@@ -3,10 +3,7 @@ def sharedLibrary = [
     version: 'release/1.0.2'
 ]
 
-// Load shared library without @Library annotation.
-// Keep "release/1.0.2" as the default version in Jenkins global library config.
-library identifier: sharedLibrary.name, changelog: false
-
+library identifier: 'jenkins-demo-library-trusted@release/1.0.2', changelog: false
 def ciConfig
 def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
