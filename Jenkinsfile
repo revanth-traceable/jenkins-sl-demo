@@ -1,43 +1,27 @@
-import com.example.utils.StringUtils
-import com.example.utils.BuildUtils
-import com.example.notification.NotificationService
+def sharedLibrary = [
+    name: 'jenkins-demo-library-trusted',
+    version: 'release/1.0.2'
+]
+
+// Load shared library without @Library annotation.
+// Keep "release/1.0.2" as the default version in Jenkins global library config.
+library identifier: sharedLibrary.name, changelog: false
+
+def ciConfig
+def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
 node {
-    try {
-        def notificationService = new NotificationService(this)
-        
-        stage('Initialize') {
-            // Direct use of StringUtils class
-            def projectName = StringUtils.formatString("Demo App", "=== ", " ===")
-            echo projectName
-            
-            // Direct use of BuildUtils class (which calls StringUtils)
-            def buildMsg = BuildUtils.generateBuildMessage(env.BUILD_NUMBER, "INITIALIZED")
-            echo buildMsg
+    stage('Load Config') {
+        if (!fileExists(configFile)) {
+            error("Config file not found: ${configFile}")
         }
-        
-        stage('Build') {
-            def buildResult = buildApp()
-            echo "Build completed: ${buildResult}"
-        }
-        
-        stage('Deploy') {
-            def deployResult = deployApp([
-                environment: 'dev',
-                version: "1.0.${env.BUILD_NUMBER}"
-            ])
-            echo "Deployment completed: ${deployResult}"
-        }
-        stage('Read Config File') {
 
-            def readme = readFile('README.md')
-            echo readme
+        ciConfig = readYaml file: configFile
+        if (!(ciConfig instanceof Map)) {
+            error("${configFile} must contain a YAML object")
         }
-                
-        echo "Pipeline completed!"
-        
-    } catch (Exception e) {
-        echo "Pipeline failed: ${e.message}"
-        throw e
+        echo "Loaded pipelineType: ${ciConfig.pipelineType ?: 'var1'} from ${configFile}"
     }
+
+    ciPipeline(ciConfig)
 }
