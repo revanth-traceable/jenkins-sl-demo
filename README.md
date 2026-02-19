@@ -149,6 +149,8 @@ Router behavior:
 
 - `pipelineType: var1` -> calls `vars/var1.groovy` (build-only)
 - `pipelineType: var2` -> calls `vars/var2.groovy` (build + deploy)
+- `pipelineConfig` is optional; you can also put `build` / `deploy` at top level
+- `pipelineConfig.build.skipTests: true` skips the test stage in `buildApp()`
 
 ## Function Call Chain
 

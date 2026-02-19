@@ -5,6 +5,7 @@ import com.example.utils.BuildUtils
 def call(Map config = [:]) {
     def buildNumber = env.BUILD_NUMBER ?: "0"
     def notificationService = new NotificationService(this)
+    boolean skipTests = config.skipTests in [true, 'true', 'TRUE', '1']
     
     try {
         notificationService.sendBuildNotification(buildNumber, "STARTED")
@@ -17,12 +18,16 @@ def call(Map config = [:]) {
         }
         
         stage('Test') {
-            echo "Running tests..."
-            // Native Jenkins sh function with script
-            sh '''
-                echo "Running unit tests..."
-                echo "Test suite: PASSED"
-            '''
+            if (skipTests) {
+                echo "Skipping tests because skipTests=true"
+            } else {
+                echo "Running tests..."
+                // Native Jenkins sh function with script
+                sh '''
+                    echo "Running unit tests..."
+                    echo "Test suite: PASSED"
+                '''
+            }
         }
         
         stage('Package') {
@@ -37,7 +42,7 @@ def call(Map config = [:]) {
         }
         
         notificationService.sendBuildNotification(buildNumber, "SUCCESS")
-        return [success: true, buildNumber: buildNumber]
+        return [success: true, buildNumber: buildNumber, skipTests: skipTests]
         
     } catch (Exception e) {
         notificationService.sendBuildNotification(buildNumber, "FAILED")

@@ -1,14 +1,19 @@
 @Library('jenkins-demo-library@main') _
 
 def ciConfig
+def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
 node {
     stage('Load Config') {
-        ciConfig = readYaml file: 'ci-config.yaml'
-        if (!(ciConfig instanceof Map)) {
-            error("ci-config.yaml must contain a YAML object")
+        if (!fileExists(configFile)) {
+            error("Config file not found: ${configFile}")
         }
-        echo "Loaded pipelineType: ${ciConfig.pipelineType ?: 'var1'}"
+
+        ciConfig = readYaml file: configFile
+        if (!(ciConfig instanceof Map)) {
+            error("${configFile} must contain a YAML object")
+        }
+        echo "Loaded pipelineType: ${ciConfig.pipelineType ?: 'var1'} from ${configFile}"
     }
 
     ciPipeline(ciConfig)
