@@ -128,6 +128,10 @@ library identifier: sharedLibrary.name, changelog: false
 def ciConfig
 
 node {
+    stage('Checkout') {
+        checkout scm
+    }
+
     stage('Load Config') {
         ciConfig = readYaml file: 'ci-config.yaml'
         if (!(ciConfig instanceof Map)) {
@@ -141,6 +145,7 @@ node {
 
 This avoids `@Library(...)`. Set `release/1.0.2` as the default version in
 Jenkins global library configuration for `jenkins-demo-library-trusted`.
+Because this is a scripted pipeline, run `checkout scm` before reading files.
 
 `ci-config.yaml` in project repo:
 

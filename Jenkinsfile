@@ -3,11 +3,15 @@ def sharedLibrary = [
     version: 'release/1.0.2'
 ]
 
-library identifier: 'jenkins-demo-library-trusted@release/1.0.2', changelog: false
+library identifier: 'jenkins-demo-library-trusted', changelog: false
 def ciConfig
 def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
 node {
+    stage('Checkout') {
+        checkout scm
+    }
+
     stage('Load Config') {
         if (!fileExists(configFile)) {
             error("Config file not found: ${configFile}")

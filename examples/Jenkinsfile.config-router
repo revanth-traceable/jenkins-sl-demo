@@ -11,6 +11,10 @@ def ciConfig
 def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
 node {
+    stage('Checkout') {
+        checkout scm
+    }
+
     stage('Load Config') {
         if (!fileExists(configFile)) {
             error("Config file not found: ${configFile}")
