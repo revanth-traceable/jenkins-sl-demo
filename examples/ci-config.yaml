@@ -1,0 +1,8 @@
+pipelineType: var2
+
+pipelineConfig:
+  build:
+    skipTests: false
+  deploy:
+    environment: staging
+    version: "2.0.0"

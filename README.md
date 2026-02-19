@@ -15,11 +15,16 @@ jenkins-sl-demo/
 │           └── NotificationService.groovy  # Calls BuildUtils (multi-level)
 ├── vars/
 │   ├── buildApp.groovy                 # Build pipeline function
-│   └── deployApp.groovy                # Deployment function
+│   ├── deployApp.groovy                # Deployment function
+│   ├── ciPipeline.groovy               # Config-based router (var1/var2)
+│   ├── var1.groovy                     # Variant 1: build-only
+│   └── var2.groovy                     # Variant 2: build + deploy
 └── examples/
-    ├── Jenkinsfile.simple             # Basic declarative pipeline
-    ├── Jenkinsfile.full               # Build + deploy pipeline
-    └── Jenkinsfile.scripted           # Scripted pipeline
+    ├── Jenkinsfile.simple              # Basic declarative pipeline
+    ├── Jenkinsfile.full                # Build + deploy pipeline
+    ├── Jenkinsfile.scripted            # Scripted pipeline
+    ├── Jenkinsfile.config-router       # Project-repo Jenkinsfile
+    └── ci-config.yaml                  # Project-repo pipeline config
 ```
 
 ## Key Features
@@ -28,6 +33,7 @@ jenkins-sl-demo/
 - **Multi-level calls**: NotificationService → BuildUtils → StringUtils
 - **Native Jenkins functions**: Uses `sh`, `writeFile`, `readFile`, `dir`
 - **Multiple pipeline styles**: Declarative and scripted examples
+- **Config-driven routing**: `ciPipeline()` selects `var1` or `var2`
 
 ## Setup in Jenkins
 
@@ -104,15 +110,57 @@ node {
 }
 ```
 
+### Config-Driven Variant Selection (Two-Repo Setup)
+
+Use this when your `Jenkinsfile` + config are in one repository and this shared
+library is in another.
+
+`Jenkinsfile` in project repo:
+
+```groovy
+@Library('jenkins-demo-library@main') _
+
+def ciConfig
+
+node {
+    stage('Load Config') {
+        ciConfig = readYaml file: 'ci-config.yaml'
+        if (!(ciConfig instanceof Map)) {
+            error("ci-config.yaml must contain a YAML object")
+        }
+    }
+
+    ciPipeline(ciConfig)
+}
+```
+
+`ci-config.yaml` in project repo:
+
+```yaml
+pipelineType: var2
+
+pipelineConfig:
+  deploy:
+    environment: staging
+    version: "2.0.0"
+```
+
+Router behavior:
+
+- `pipelineType: var1` -> calls `vars/var1.groovy` (build-only)
+- `pipelineType: var2` -> calls `vars/var2.groovy` (build + deploy)
+
 ## Function Call Chain
 
 ```
 Jenkinsfile
-    └─> buildApp() or deployApp()
-        └─> NotificationService.sendBuildNotification()
-            └─> BuildUtils.generateBuildMessage()
-                └─> StringUtils.toUpperCase()
-                └─> StringUtils.formatString()
+    └─> ciPipeline(config)
+        └─> var1(config) or var2(config)
+            └─> buildApp() / deployApp()
+                └─> NotificationService.sendBuildNotification()
+                    └─> BuildUtils.generateBuildMessage()
+                        └─> StringUtils.toUpperCase()
+                        └─> StringUtils.formatString()
 ```
 
 ## Testing Migration to Harness

@@ -1,0 +1,15 @@
+@Library('jenkins-demo-library@main') _
+
+def ciConfig
+
+node {
+    stage('Load Config') {
+        ciConfig = readYaml file: 'ci-config.yaml'
+        if (!(ciConfig instanceof Map)) {
+            error("ci-config.yaml must contain a YAML object")
+        }
+        echo "Loaded pipelineType: ${ciConfig.pipelineType ?: 'var1'}"
+    }
+
+    ciPipeline(ciConfig)
+}
