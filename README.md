@@ -40,8 +40,8 @@ jenkins-sl-demo/
 1. Go to **Manage Jenkins** → **Configure System**
 2. Under **Global Pipeline Libraries**, click **Add**
 3. Configure:
-   - **Name**: `jenkins-demo-library`
-   - **Default version**: `main` (or your branch)
+   - **Name**: `jenkins-demo-library-trusted`
+   - **Default version**: `release/1.0.2`
    - **Retrieval method**: Modern SCM
    - **Source Code Management**: Git
    - **Project Repository**: Path to this repository
@@ -118,7 +118,12 @@ library is in another.
 `Jenkinsfile` in project repo:
 
 ```groovy
-@Library('jenkins-demo-library@main') _
+def sharedLibrary = [
+    name: 'jenkins-demo-library-trusted',
+    version: 'release/1.0.2'
+]
+
+library identifier: sharedLibrary.name, changelog: false
 
 def ciConfig
 
@@ -133,6 +138,9 @@ node {
     ciPipeline(ciConfig)
 }
 ```
+
+This avoids `@Library(...)`. Set `release/1.0.2` as the default version in
+Jenkins global library configuration for `jenkins-demo-library-trusted`.
 
 `ci-config.yaml` in project repo:
 
