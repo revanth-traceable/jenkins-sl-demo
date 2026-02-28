@@ -1,4 +1,4 @@
-@Library('jenkins-demo-library') _
+@Library('jenkins-demo-library-trusted') _
 
 import com.example.utils.StringUtils
 import com.example.utils.BuildUtils
