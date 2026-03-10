@@ -3,7 +3,7 @@ def sharedLibrary = [
     version: 'release/1.0.2'
 ]
 
-library identifier: 'jenkins-demo-library-trusted', changelog: false
+library identifier: "${sharedLibrary.name}@${sharedLibrary.version}", changelog: false
 def ciConfig
 def configFile = env.CI_CONFIG_FILE ?: 'ci-config.yaml'
 
